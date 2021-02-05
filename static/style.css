@@ -1,0 +1,16 @@
+/* Global Styles
+----------------------------------------------*/
+main .form-control {
+    display: inline-block;
+    width: auto;
+}
+
+main {
+    /* allow for horizontal scroll */
+    overflow-x: auto;
+    /* Center content */
+    text-align: center;
+}
+
+/* Responsive Styles
+-----------------------------------------------*/

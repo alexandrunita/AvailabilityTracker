@@ -35,7 +35,40 @@ def index():
     """ Show current Team availability """
     return apology("TODO", 200)
 
-@app.route("/login")
+@app.route("/login", methods=["GET","POST"])
 def login():
-    """ Login form """
-    return apology("TODO", 200)
+    """ Login page """
+    # check if POST used    
+    if request.method == "POST":
+        return apology("TODO", 400)
+    
+    # for GET return login page
+    return render_template("login.html")
+
+@app.route("/register", methods=["GET","POST"])
+def register():
+    """ Registration Page """
+    # check if method is POST
+    if request.method == "POST":
+        return apology("TODO", 400)
+    
+    # for GET return register page
+    return render_template("register.html")
+
+
+def errorhandler(e):
+    """Handle error"""
+    if not isinstance(e, HTTPException):
+        e = InternalServerError()
+    return apology(e.name, e.code)
+
+
+# Listen for errors
+for code in default_exceptions:
+    app.errorhandler(code)(errorhandler)
+
+# Run App in Debug Mode
+# This will Reload the app automatically once app code changes
+if __name__ == '__main__':
+
+    app.run(debug = True)
