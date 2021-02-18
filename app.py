@@ -38,6 +38,10 @@ def index():
 @app.route("/login", methods=["GET","POST"])
 def login():
     """ Login page """
+
+    # Forget any user_id
+    session.clear()
+
     # check if POST used    
     if request.method == "POST":
         return apology("TODO", 400)
@@ -48,9 +52,44 @@ def login():
 @app.route("/register", methods=["GET","POST"])
 def register():
     """ Registration Page """
+
+    # Forget any user_id
+    session.clear()
+
     # check if method is POST
     if request.method == "POST":
-        return apology("TODO", 400)
+        # ensure UserName was provided
+        userName = request.form.get("username")
+        if not userName:
+            return apology("must provide username")
+        # query existing users and make sure username is not already taken
+        conn = sqlite3.connect("availability.db")
+        c = conn.cursor()
+        c.execute("SELECT username FROM users")
+        currentUsers = c.fetchall()[0]
+        conn.commit()
+        conn.close()
+        print(currentUsers)
+        if userName in currentUsers:
+            return apology("username already taken, try another one")
+        # check if password or confirmation blank
+        password = request.form.get("password")
+        confirmation = request.form.get("confirmation")
+        if not password or not confirmation:
+            return apology("password and confirmation must be filled in")
+        # ensure password and confirmation match
+        if password != confirmation:
+            return apology("password and confirmation must match")
+        # generate password hash
+        passwordHash = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
+        # insert new user into db
+        conn = sqlite3.connect("availability.db")
+        c = conn.cursor()
+        c.execute("INSERT INTO users (username, pw_hash) VALUES(?, ?)", (userName, passwordHash))
+        conn.commit()
+        conn.close()
+        # return successful registration screen
+        return render_template("register.html", registered=True)
     
     # for GET return register page
     return render_template("register.html")
