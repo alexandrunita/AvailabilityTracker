@@ -51,11 +51,21 @@ def index():
     for user in users:
         userNames.append(user[1])
 
-    print(userNames)
-
     # return availability template
     return render_template("availability.html", currentDate=currentDate, userNames = userNames)
-    
+
+@app.route("/bookOOF", methods=["GET","POST"])
+@login_required
+def bookOOF():
+    """Book OOF day"""
+
+    # check if POST used
+    if request.method == "POST":
+        return(apology("TODO", 200))
+
+    # if GET is used return form
+    return render_template("bookOOF.html")
+
 
 @app.route("/login", methods=["GET","POST"])
 def login():

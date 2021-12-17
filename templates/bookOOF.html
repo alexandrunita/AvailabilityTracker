@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Book OOF
+{% endblock %}
+
+{% block main %}
+    {% if not booked %}
+        <form action="/bookOOF" method="post">
+            <label for="startDate">startDate</label>
+            <input id="startDate" name="startDate" type="date" required>
+            <label for="endDate">endDate</label>
+            <input id="endDate" name="endDate" type="date" required>
+            <label for="halfDay">HalfDay</label>
+            <input id="halfDay" name="halfDay" value="True" type="checkbox">
+            <button>submit</button>
+        </form>
+    {% endif %}
+    {% if booked %}
+        <p>You have booked OOF successfully</p>
+    {% endif %}
+{% endblock %}
