@@ -2,19 +2,26 @@ import sqlite3
 
 def username_lookup(userName):
     """ Lookup user from availability.db by unique username """
+
     # connect to db
     conn = sqlite3.connect("availability.db")
     # create cursor
     c = conn.cursor()
-    # query for username in db
-    c.execute("SELECT * FROM users WHERE username = ?", (userName,))
-    # store user into variable
-    user = c.fetchone()
+
+    # check if lookup initiated for specific user or for all users
+    if userName:
+        # query for username in db
+        c.execute("SELECT * FROM users WHERE username = ?", (userName,))
+    else:
+        c.execute("SELECT * FROM users")
+    
+    # store user/users list into variable
+    users = c.fetchall()
     # commit connect and close
     conn.commit()
     conn.close()
     # return user
-    return user
+    return users
 
 
 def insert_user(userName, passwordHash):

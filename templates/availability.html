@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Availability
+{% endblock %}
+
+{% block main %}
+    <p>{{currentDate}}</p>
+    <p>{{userNames}}</p>
+    {%for userName in userNames%}
+    <table>
+        <tr>
+            <td>{{userName}}</td>
+        </tr>
+    </table>
+
+    {%endfor%}
+{% endblock %}

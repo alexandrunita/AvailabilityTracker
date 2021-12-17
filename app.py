@@ -3,7 +3,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import datetime
+from datetime import datetime, date
 import sqlite3
 import database
 
@@ -34,7 +34,28 @@ Session(app)
 @login_required
 def index():
     """ Show current Team availability """
-    return apology("TODO", 200)
+
+    # Collect current date
+    currentDate = date.today().strftime("%A %d. %B %Y")
+
+    # collect all users from DB
+    users = database.username_lookup(None)
+
+    # TODO
+    # remove password hash from users before sending data to FrontEnd
+
+    # declare list of usernames : userNames
+    userNames = []
+    # iterate through the list of tuples containing full user info
+    # append each username to userNames list
+    for user in users:
+        userNames.append(user[1])
+
+    print(userNames)
+
+    # return availability template
+    return render_template("availability.html", currentDate=currentDate, userNames = userNames)
+    
 
 @app.route("/login", methods=["GET","POST"])
 def login():
@@ -55,8 +76,8 @@ def login():
         # return apology for blank password
         if not password:
             return apology("must provide password", 403)
-        # query database for username
-        existingUser = database.username_lookup(userName)
+        # query database for username, collect first entry from list of size 1
+        existingUser = database.username_lookup(userName)[0]
         # check if user was found and if provided password matches DB hash
         if not existingUser or not check_password_hash(existingUser[2], password):
             return apology("invalid username and/or password", 403)
