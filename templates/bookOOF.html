@@ -15,15 +15,17 @@
             <input id="halfDay" name="halfDay" value="True" type="checkbox">
             <select id="oofType" name="oofType" required>
                 <option disabled selected value="">OOF Type</option>
-                <option>Vacation</option>
-                <option>Bank Holiday</option>
-                <option>Attending Training</option>
-                <option>Delivering Training</option>
+                {% for oofType in oofTypes %}
+                <option>{{oofType}}</option>
+                {%endfor%}
             </select>
             <button>submit</button>
         </form>
     {% endif %}
     {% if booked %}
-        <p>You have booked OOF successfully</p>
+        <p>{{startDate}}</p>
+        <p>{{endDate}}</p>
+        <p>{{isHalfDay}}</p>
+        <p>{{oofType}}</p>
     {% endif %}
 {% endblock %}
