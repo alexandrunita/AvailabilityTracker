@@ -84,7 +84,10 @@ def bookOOF():
         if startDate == endDate and halfDay == "True":
             isHalfDay = True
         
-        
+        # check if startDate > endDate
+        if date.fromisoformat(startDate) > date.fromisoformat(endDate):
+            return apology("Bad Request - OOF End Date cannot precede Start Date", 400)
+
         # return booking confirmation page
         return render_template("bookOOF.html", booked = True, startDate = startDate, endDate = endDate, isHalfDay = isHalfDay, oofType = oofType)
 

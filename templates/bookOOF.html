@@ -7,19 +7,23 @@
 {% block main %}
     {% if not booked %}
         <form action="/bookOOF" method="post">
-            <label for="startDate">startDate</label>
-            <input id="startDate" name="startDate" type="date" required>
-            <label for="endDate">endDate</label>
-            <input id="endDate" name="endDate" type="date" required>
-            <label for="halfDay">HalfDay</label>
-            <input id="halfDay" name="halfDay" value="True" type="checkbox">
-            <select id="oofType" name="oofType" required>
-                <option disabled selected value="">OOF Type</option>
-                {% for oofType in oofTypes %}
-                <option>{{oofType}}</option>
-                {%endfor%}
-            </select>
-            <button>submit</button>
+            <div class="form-group">
+                <label for="startDate">startDate</label>
+                <input id="startDate" name="startDate" type="date" required>    
+                <label for="endDate">endDate</label>
+                <input id="endDate" name="endDate" type="date" required>
+            </div>
+            <div class="form-group">
+                <label for="halfDay">HalfDay</label>
+                <input id="halfDay" name="halfDay" value="True" type="checkbox">
+                <select id="oofType" name="oofType" required>
+                    <option disabled selected value="">OOF Type</option>
+                    {% for oofType in oofTypes %}
+                    <option>{{oofType}}</option>
+                    {%endfor%}
+                </select>
+                <button>submit</button>
+            </div>
         </form>
     {% endif %}
     {% if booked %}
