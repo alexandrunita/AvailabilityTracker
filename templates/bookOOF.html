@@ -13,6 +13,13 @@
             <input id="endDate" name="endDate" type="date" required>
             <label for="halfDay">HalfDay</label>
             <input id="halfDay" name="halfDay" value="True" type="checkbox">
+            <select id="oofType" name="oofType" required>
+                <option disabled selected value="">OOF Type</option>
+                <option>Vacation</option>
+                <option>Bank Holiday</option>
+                <option>Attending Training</option>
+                <option>Delivering Training</option>
+            </select>
             <button>submit</button>
         </form>
     {% endif %}
