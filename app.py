@@ -88,6 +88,13 @@ def bookOOF():
         if date.fromisoformat(startDate) > date.fromisoformat(endDate):
             return apology("Bad Request - OOF End Date cannot precede Start Date", 400)
 
+        # check if startDate before Today
+        if date.fromisoformat(startDate) < date.today():
+            return apology("Bad Request - OOF Start Date cannot precede Today", 400)
+
+        # TODO - review if further input validation is needed
+        # TODO - start OOF Day insertion into DB
+
         # return booking confirmation page
         return render_template("bookOOF.html", booked = True, startDate = startDate, endDate = endDate, isHalfDay = isHalfDay, oofType = oofType)
 
