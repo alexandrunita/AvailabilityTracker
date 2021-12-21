@@ -72,35 +72,29 @@ def bookOOF():
         startDate = request.form.get("startDate")
         endDate = request.form.get("endDate")
         halfDay = request.form.get("halfDay")
-        oofType = request.form.get("oofType")
-        
-        # TODO - validate user inputs
+        oofType = request.form.get("oofType")  
+        # validate user inputs
         if oofType not in OOF_TYPES:
             return apology("Bad Request - Unsupported OOF Type", 400)
-
         # check if this is a half day request
         # by default it will not be a half day
         isHalfDay = False
         if startDate == endDate and halfDay == "True":
             isHalfDay = True
-        
         # check if no startDate or endDate provided
         if not startDate or not endDate:
             return apology("Bad Request - must provide StartDate AND EndDate for OOF request", 400)
         # check if startDate > endDate
         if date.fromisoformat(startDate) > date.fromisoformat(endDate):
             return apology("Bad Request - OOF End Date cannot precede Start Date", 400)
-
         # check if startDate before Today
         if date.fromisoformat(startDate) < date.today():
             return apology("Bad Request - OOF Start Date cannot precede Today", 400)
-
-        # TODO - start OOF Day insertion into DB
-        print(session["user_id"])
-
+        # if oofDay failed to be inserted in DB, return apology and explain cause is conflict with prior OOF day
+        if not database.insert_OOF(startDate, endDate, isHalfDay, oofType, session["user_id"]):
+            return apology("OOF NOT BOOKED - request conflicts with previous OOF booking for this user", 400)
         # return booking confirmation page
         return render_template("bookOOF.html", booked = True, startDate = startDate, endDate = endDate, isHalfDay = isHalfDay, oofType = oofType)
-
     # if GET is used return form
     return render_template("bookOOF.html", oofTypes = OOF_TYPES)
 

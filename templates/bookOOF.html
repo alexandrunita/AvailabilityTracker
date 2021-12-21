@@ -14,7 +14,7 @@
                 <input id="endDate" name="endDate" type="date" required>
             </div>
             <div class="form-group">
-                <label for="halfDay">HalfDay</label>
+                <label id="halfDayLabel" for="halfDay">HalfDay</label>
                 <input id="halfDay" name="halfDay" value="True" type="checkbox">
                 <select id="oofType" name="oofType" required>
                     <option disabled selected value="">OOF Type</option>
@@ -25,11 +25,51 @@
                 <button>submit</button>
             </div>
         </form>
+        <script>
+            // function that hides/displays halfDay checkbox and label
+            function hideCheckbox() {
+                let start = document.querySelector('#startDate').value;
+                let end = document.querySelector('#endDate').value;
+                let halfDayCheckbox = document.querySelector('#halfDay');
+                let halfDayLabel = document.querySelector('#halfDayLabel');
+                // if user has selected startDate & endDate and they are the same, hide halfDay checkbox & label
+                if(start != end && start != '' && end != '') {
+                    halfDayCheckbox.style.display = 'none';
+                    halfDayLabel.style.display = 'none';
+                }
+                // if user has updated his input so that startDate & endDate are the same, display halfday checkbox & label
+                else {
+                    halfDayCheckbox.style.display = 'inline-block';
+                    halfDayLabel.style.display = 'inline-block';
+                }
+            }
+            // when startDate or endDate changed => run function to check if halfDay checkbox needs to be hidden
+            startButton = document.querySelector('#startDate');
+            endButton = document.querySelector('#endDate');
+
+            startButton.addEventListener("change", hideCheckbox);
+            endButton.addEventListener("change", hideCheckbox);
+        </script>
     {% endif %}
     {% if booked %}
-        <p>{{startDate}}</p>
-        <p>{{endDate}}</p>
-        <p>{{isHalfDay}}</p>
-        <p>{{oofType}}</p>
+        <table class="mx-auto w-75 p-3 table table-sm">
+            <th colspan="2">Successfully Booked OOF with following details</th>
+            <tr>
+                <td>Start Date</td>
+                <td>{{startDate}}</td>
+            </tr>
+            <tr>
+                <td>End Date</td>
+                <td>{{endDate}}</td>
+            </tr>
+            <tr>
+                <td>isHalfDay</td>
+                <td>{{isHalfDay}}</td>
+            </tr>
+            <tr>
+                <td>OOF Type</td>
+                <td>{{oofType}}</td>
+            </tr>
+        </table>
     {% endif %}
 {% endblock %}
