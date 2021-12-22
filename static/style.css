@@ -1,5 +1,6 @@
 /* Global Styles
 ----------------------------------------------*/
+
 main .form-control {
     display: inline-block;
     width: auto;
@@ -12,5 +13,29 @@ main {
     text-align: center;
 }
 
+.fixed {
+    position: sticky;
+    left: 0;
+    background-color:white;
+    z-index: 0;
+}
+
+.availabilityLegend {
+    position: sticky;
+    top: 0;
+    left: 0;
+    background:white;
+    z-index: 0;
+}
+
+.secondLayer{
+    z-index: -1;
+    text-align: center;
+    border: thin solid black;
+}
+
 /* Responsive Styles
 -----------------------------------------------*/
+@media screen and (max-width: 480px)
+{
+}

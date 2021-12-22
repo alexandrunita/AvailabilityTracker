@@ -3,7 +3,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import sqlite3
 import database
 
@@ -58,19 +58,20 @@ def index():
     for user in users:
         userNames.append(user[1])
 
-    # TODO - build availability table to show starting with TODAY:
-    # Month as 1 header row under which individual dates left in month
-    # Table data should cover 12 months forward
-    # distinct marker for each OOF day for each person
+    # TODO - distinct marker for each OOF day for each person
 
     # collect list of all month names and required colspan for each
+    # reset set a cursor starting with current month first day to ensure no issues with date arithmatic
     months = []
     i = 0
-    # reset set a cursor starting with current month first day to ensure no issues with date arithmatic
     firstDayOfCurrentMonth = currentDate.replace(day = 1)
-
+    # create list of days that will hold formatted strings of all day values for the next 12 months
+    dayStrings = []
+    dateCursor = currentDate
+    # iterate through 12 months - limit to be exposed to end users on availability page
     for i in range(12):
         currentMonth = {}
+        # collect name of current month
         currentMonth["name"] = firstDayOfCurrentMonth.strftime("%B")
         # check if current month is December, increment to next year
         if firstDayOfCurrentMonth.month % 12 == 0:
@@ -79,22 +80,23 @@ def index():
             firstDayofNextMonth = firstDayOfCurrentMonth.replace(month=firstDayOfCurrentMonth.month+1)
         # check if we are on the currentDate, if yes find out number of days until end of this month
         # else find out total number of days in month
-        print(currentDate)
         if currentDate.month == firstDayOfCurrentMonth.month and currentDate.year == firstDayOfCurrentMonth.year:
             currentMonth["daysLeft"] = (firstDayofNextMonth - currentDate).days
         else:
             currentMonth["daysLeft"] = (firstDayofNextMonth - firstDayOfCurrentMonth).days
+        # iterate through all days left to append to daysStrings
+        j = 0
+        for j in range(currentMonth["daysLeft"]):
+            dayStrings.append(dateCursor.strftime("%d"))
+            # increment dateCursor with one more day
+            dateCursor = dateCursor + timedelta(days=1)
         currentMonth["year"] = firstDayOfCurrentMonth.year
         # move to next moth in iteration
         firstDayOfCurrentMonth = firstDayofNextMonth
         # append current month details to months list
         months.append(currentMonth)
-
-    print(months)
-
-
     # return availability template
-    return render_template("availability.html", currentDateString = currentDateString, userNames = userNames)
+    return render_template("availability.html", currentDateString = currentDateString, userNames = userNames, months = months, dayStrings = dayStrings)
 
 
 @app.route("/bookOOF", methods=["GET","POST"])
