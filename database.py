@@ -37,9 +37,25 @@ def insert_user(userName, passwordHash):
     conn.commit()
     conn.close()
 
+def lookup_bookedOOF(user_id, today):
+    """ Lookup availability.db to get all booked OOF days for user_id """
+    # TODO - connect to database, look up current booked OOF => return booked OOF days to caller
+    # connect to db
+    conn = sqlite3.connect("availability.db")
+    # create cursor
+    c = conn.cursor()
+    # lookup all booked oof with end date after today for current user
+    c.execute("SELECT * FROM oof_days WHERE user_id = ? AND end_date >= ? ORDER BY start_date", (user_id, today))
+    oofDays = c.fetchall()
+    # commit & close
+    conn.commit()
+    conn.close()
+    # return oofDays - list of tuples
+    return oofDays
+
 
 def insert_OOF(startDate, endDate, isHalfDay, oofType, user_id):
-    """ Insert OOF period in avaiability.db """
+    """ Insert OOF period in availability.db """
     # connect to db
     conn = sqlite3.connect("availability.db")
     # create cursor
@@ -48,7 +64,7 @@ def insert_OOF(startDate, endDate, isHalfDay, oofType, user_id):
     c.execute("SELECT id FROM oof_types WHERE name = ?", (oofType,))
     oof_type_id = c.fetchone()[0]
     # collect current OOF days for user_id in oofDays variable
-    c.execute("SELECT start_date, end_date FROM oof_days WHERE user_id = ?", (user_id,))
+    c.execute("SELECT start_date, end_date FROM oof_days WHERE user_id = ? AND end_date >= ?", (user_id, startDate))
     oofDays = c.fetchall()
     # check if there are any overlapping OOF Days during this time frame for the requesting user
     currentStartDate = date.fromisoformat(startDate)

@@ -95,8 +95,12 @@ def bookOOF():
             return apology("OOF NOT BOOKED - request conflicts with previous OOF booking for this user", 400)
         # return booking confirmation page
         return render_template("bookOOF.html", booked = True, startDate = startDate, endDate = endDate, isHalfDay = isHalfDay, oofType = oofType)
-    # if GET is used return form
-    return render_template("bookOOF.html", oofTypes = OOF_TYPES)
+    # if GET is used => return form
+    # display all booked OOF days for current user at bottom of page
+    oofDays = database.lookup_bookedOOF(session["user_id"], date.today().isoformat())
+    # if user has no pre-existent booked OOF days, add nothing to standard template
+    return render_template("bookOOF.html", oofTypes = OOF_TYPES, oofDays = oofDays)
+    
 
 
 @app.route("/login", methods=["GET","POST"])
