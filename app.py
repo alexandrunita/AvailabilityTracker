@@ -12,6 +12,14 @@ from helpers import login_required, apology
 # Configure application
 app = Flask(__name__)
 
+# Initializing list of approved OOF Types
+OOF_TYPES = [
+    "Vacation",
+    "Bank Holiday",
+    "Attending Training",
+    "Delivering Training"
+]
+
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
@@ -29,6 +37,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+
 # root route function
 @app.route("/")
 @login_required
@@ -41,9 +50,6 @@ def index():
     # collect all users from DB
     users = database.username_lookup(None)
 
-    # TODO
-    # remove password hash from users before sending data to FrontEnd
-
     # declare list of usernames : userNames
     userNames = []
     # iterate through the list of tuples containing full user info
@@ -51,11 +57,51 @@ def index():
     for user in users:
         userNames.append(user[1])
 
-    print(userNames)
-
     # return availability template
-    return render_template("availability.html", currentDate=currentDate, userNames = userNames)
+    return render_template("availability.html", currentDate = currentDate, userNames = userNames)
+
+
+@app.route("/bookOOF", methods=["GET","POST"])
+@login_required
+def bookOOF():
+    """Book OOF day"""
+
+    # check if POST used
+    if request.method == "POST":
+        # store OOF details in variables
+        startDate = request.form.get("startDate")
+        endDate = request.form.get("endDate")
+        halfDay = request.form.get("halfDay")
+        oofType = request.form.get("oofType")  
+        # validate user inputs
+        if oofType not in OOF_TYPES:
+            return apology("Bad Request - Unsupported OOF Type", 400)
+        # check if this is a half day request
+        # by default it will not be a half day
+        isHalfDay = False
+        if startDate == endDate and halfDay == "True":
+            isHalfDay = True
+        # check if no startDate or endDate provided
+        if not startDate or not endDate:
+            return apology("Bad Request - must provide StartDate AND EndDate for OOF request", 400)
+        # check if startDate > endDate
+        if date.fromisoformat(startDate) > date.fromisoformat(endDate):
+            return apology("Bad Request - OOF End Date cannot precede Start Date", 400)
+        # check if startDate before Today
+        if date.fromisoformat(startDate) < date.today():
+            return apology("Bad Request - OOF Start Date cannot precede Today", 400)
+        # if oofDay failed to be inserted in DB, return apology and explain cause is conflict with prior OOF day
+        if not database.insert_OOF(startDate, endDate, isHalfDay, oofType, session["user_id"]):
+            return apology("OOF NOT BOOKED - request conflicts with previous OOF booking for this user", 400)
+        # return booking confirmation page
+        return render_template("bookOOF.html", booked = True, startDate = startDate, endDate = endDate, isHalfDay = isHalfDay, oofType = oofType)
+    # if GET is used => return form
+    # display all booked OOF days for current user at bottom of page
+    oofDays = database.lookup_bookedOOF(session["user_id"], date.today().isoformat())
+    # if user has no pre-existent booked OOF days, add nothing to standard template
+    return render_template("bookOOF.html", oofTypes = OOF_TYPES, oofDays = oofDays)
     
+
 
 @app.route("/login", methods=["GET","POST"])
 def login():

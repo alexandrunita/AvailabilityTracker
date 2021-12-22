@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Book OOF
+{% endblock %}
+
+{% block main %}
+    {% if not booked %}
+        <form action="/bookOOF" method="post">
+            <div class="form-group">
+                <label for="startDate">startDate</label>
+                <input id="startDate" name="startDate" type="date" required>    
+                <label for="endDate">endDate</label>
+                <input id="endDate" name="endDate" type="date" required>
+            </div>
+            <div class="form-group">
+                <label id="halfDayLabel" for="halfDay">HalfDay</label>
+                <input id="halfDay" name="halfDay" value="True" type="checkbox">
+                <select id="oofType" name="oofType" required>
+                    <option disabled selected value="">OOF Type</option>
+                    {% for oofType in oofTypes %}
+                    <option>{{oofType}}</option>
+                    {%endfor%}
+                </select>
+                <button>submit</button>
+            </div>
+        </form>
+        <script>
+            // function that hides/displays halfDay checkbox and label
+            function hideCheckbox() {
+                let start = document.querySelector('#startDate').value;
+                let end = document.querySelector('#endDate').value;
+                let halfDayCheckbox = document.querySelector('#halfDay');
+                let halfDayLabel = document.querySelector('#halfDayLabel');
+                // if user has selected startDate & endDate and they are the same, hide halfDay checkbox & label
+                if(start != end && start != '' && end != '') {
+                    halfDayCheckbox.style.display = 'none';
+                    halfDayLabel.style.display = 'none';
+                }
+                // if user has updated his input so that startDate & endDate are the same, display halfday checkbox & label
+                else {
+                    halfDayCheckbox.style.display = 'inline-block';
+                    halfDayLabel.style.display = 'inline-block';
+                }
+            }
+            // when startDate or endDate changed => run function to check if halfDay checkbox needs to be hidden
+            startButton = document.querySelector('#startDate');
+            endButton = document.querySelector('#endDate');
+
+            startButton.addEventListener("change", hideCheckbox);
+            endButton.addEventListener("change", hideCheckbox);
+        </script>
+        {% if oofDays %}
+        <table class="mx-auto table table-sm">
+            <thead>
+                <tr>
+                    <th colspan="4">Upcomming OOF days</th>
+                </tr>
+                <tr>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Vacation Type</th>
+                    <th>isHalfDay</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for oofDay in oofDays %}
+                <tr>
+                    <td>{{oofDay[2]}}</td>
+                    <td>{{oofDay[3]}}</td>
+                    <td>
+                        {{oofTypes[oofDay[1] - 1]}}
+                    </td>
+                    <td>
+                        {% if oofDay[4]%}
+                        Half Day
+                        {% else %}
+                        Full Day
+                        {% endif %}
+                    </td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+        {% endif %}
+    {% else %}
+        <table class="mx-auto w-75 p-3 table table-sm">
+            <th colspan="2">Successfully Booked OOF with following details</th>
+            <tr>
+                <td>Start Date</td>
+                <td>{{startDate}}</td>
+            </tr>
+            <tr>
+                <td>End Date</td>
+                <td>{{endDate}}</td>
+            </tr>
+            <tr>
+                <td>isHalfDay</td>
+                <td>{{isHalfDay}}</td>
+            </tr>
+            <tr>
+                <td>OOF Type</td>
+                <td>{{oofType}}</td>
+            </tr>
+        </table>
+    {% endif %}
+{% endblock %}
