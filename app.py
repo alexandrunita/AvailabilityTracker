@@ -45,7 +45,8 @@ def index():
     """ Show current Team availability """
 
     # Collect current date
-    currentDate = date.today().strftime("%A %d. %B %Y")
+    currentDate = date.today()
+    currentDateString = currentDate.strftime("%A %d. %B %Y")
 
     # collect all users from DB
     users = database.username_lookup(None)
@@ -57,8 +58,43 @@ def index():
     for user in users:
         userNames.append(user[1])
 
+    # TODO - build availability table to show starting with TODAY:
+    # Month as 1 header row under which individual dates left in month
+    # Table data should cover 12 months forward
+    # distinct marker for each OOF day for each person
+
+    # collect list of all month names and required colspan for each
+    months = []
+    i = 0
+    # reset set a cursor starting with current month first day to ensure no issues with date arithmatic
+    firstDayOfCurrentMonth = currentDate.replace(day = 1)
+
+    for i in range(12):
+        currentMonth = {}
+        currentMonth["name"] = firstDayOfCurrentMonth.strftime("%B")
+        # check if current month is December, increment to next year
+        if firstDayOfCurrentMonth.month % 12 == 0:
+            firstDayofNextMonth = firstDayOfCurrentMonth.replace(month=1, year=firstDayOfCurrentMonth.year+1)        
+        else:
+            firstDayofNextMonth = firstDayOfCurrentMonth.replace(month=firstDayOfCurrentMonth.month+1)
+        # check if we are on the currentDate, if yes find out number of days until end of this month
+        # else find out total number of days in month
+        print(currentDate)
+        if currentDate.month == firstDayOfCurrentMonth.month and currentDate.year == firstDayOfCurrentMonth.year:
+            currentMonth["daysLeft"] = (firstDayofNextMonth - currentDate).days
+        else:
+            currentMonth["daysLeft"] = (firstDayofNextMonth - firstDayOfCurrentMonth).days
+        currentMonth["year"] = firstDayOfCurrentMonth.year
+        # move to next moth in iteration
+        firstDayOfCurrentMonth = firstDayofNextMonth
+        # append current month details to months list
+        months.append(currentMonth)
+
+    print(months)
+
+
     # return availability template
-    return render_template("availability.html", currentDate = currentDate, userNames = userNames)
+    return render_template("availability.html", currentDateString = currentDateString, userNames = userNames)
 
 
 @app.route("/bookOOF", methods=["GET","POST"])
