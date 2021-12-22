@@ -5,13 +5,35 @@
 {% endblock %}
 
 {% block main %}
-    <p>{{currentDate}}</p>
-    {%for userName in userNames%}
-    <table>
-        <tr>
-            <td>{{userName}}</td>
-        </tr>
+    <p class="availabilityLegend">
+        FullDays -> Vacation : V | Bank Holiday : BH | Attending Training : AT | Delivering Training : DT | WeekEnd : WE
+        <br>
+        HalfDays -> Vacation : hV | Attending Training : hAT | Delivering Training : hDT
+    </p>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th class="fixed">Month&Year</th>
+                {% for month in months %}
+                    <th class="secondLayer" colspan="{{month['daysLeft']}}">{{month["name"]}} {{month["year"]}}</th>    
+                {% endfor %}
+            </tr>
+            <tr>
+                <th class="fixed">UserName\Date</th>
+                {% for day in dayStrings %}
+                    <th>{{day}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for userName in userNames %}
+            <tr>
+                <th class="fixed">{{userName}}</th>
+                {% for userDayString in usersDayStrings[userName] %}
+                    <td>{{userDayString}}</td>
+                {%endfor%}
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
-
-    {%endfor%}
 {% endblock %}

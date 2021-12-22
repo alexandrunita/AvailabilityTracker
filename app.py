@@ -3,11 +3,11 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import sqlite3
 import database
 
-from helpers import login_required, apology
+from helpers import login_required, apology, calculate_userDateStrings
 
 # Configure application
 app = Flask(__name__)
@@ -18,6 +18,17 @@ OOF_TYPES = [
     "Bank Holiday",
     "Attending Training",
     "Delivering Training"
+]
+# Initializing list of approved OOF Type abbreviations
+OOF_Type_Abv = [
+    "V",
+    "BH",
+    "AT",
+    "DT",
+    "hV",
+    "hAT",
+    "hDT",
+    "WE"
 ]
 
 # Ensure templates are auto-reloaded
@@ -45,20 +56,78 @@ def index():
     """ Show current Team availability """
 
     # Collect current date
-    currentDate = date.today().strftime("%A %d. %B %Y")
+    currentDate = date.today()
+    currentDateString = currentDate.strftime("%A %d. %B %Y")
 
     # collect all users from DB
     users = database.username_lookup(None)
 
+    # declare dictionary of key : username + value : list of upcoming OOF intervals
+    userOOFDays = {}
     # declare list of usernames : userNames
     userNames = []
     # iterate through the list of tuples containing full user info
     # append each username to userNames list
     for user in users:
         userNames.append(user[1])
+        # storing upcoming OOF intervals for each username key inside dictionary
+        userOOFList = database.lookup_bookedOOF(user[0], currentDate)
+        # declare OOF day list in userOOFDays dictionary for current user
+        userOOFDays[user[1]] = []
+        for userOOF in userOOFList:
+            start = date.fromisoformat(userOOF[2])
+            end = date.fromisoformat(userOOF[3])
+            isHalfDay = userOOF[4]
+            oofType = userOOF[1]
+            # loop from start to end date and add to userOOFDays : date, oofType, isHalfDay
+            while start <= end:
+                userOOFDays[user[1]].append((start.isoformat(), oofType, isHalfDay))
+                start = start + timedelta(days=1)
+    
+    # reset set a cursor starting with current month first day to ensure no issues with date arithmetic
+    months = []
+    i = 0
+    firstDayOfCurrentMonth = currentDate.replace(day = 1)
+    # create list of days that will hold formatted strings of all day values for the next 12 months
+    dayStrings = []
+    dateCursor = currentDate
+
+    # iterate through 12 months - limit to be exposed to end users on availability page
+    for i in range(12):
+        currentMonth = {}
+        # collect name of current month
+        currentMonth["name"] = firstDayOfCurrentMonth.strftime("%B")
+        # check if current month is December, increment to next year
+        if firstDayOfCurrentMonth.month % 12 == 0:
+            firstDayofNextMonth = firstDayOfCurrentMonth.replace(month=1, year=firstDayOfCurrentMonth.year+1)        
+        else:
+            firstDayofNextMonth = firstDayOfCurrentMonth.replace(month=firstDayOfCurrentMonth.month+1)
+        # check if we are on the currentDate, if yes find out number of days until end of this month
+        # else find out total number of days in month
+        if currentDate.month == firstDayOfCurrentMonth.month and currentDate.year == firstDayOfCurrentMonth.year:
+            currentMonth["daysLeft"] = (firstDayofNextMonth - currentDate).days
+        else:
+            currentMonth["daysLeft"] = (firstDayofNextMonth - firstDayOfCurrentMonth).days
+        # iterate through all days left to append to daysStrings
+        j = 0
+        for j in range(currentMonth["daysLeft"]):
+            dayStrings.append(dateCursor.strftime("%d"))
+            # increment dateCursor with one more day
+            dateCursor = dateCursor + timedelta(days=1)
+        currentMonth["year"] = firstDayOfCurrentMonth.year
+        # move to next moth in iteration
+        firstDayOfCurrentMonth = firstDayofNextMonth
+        # append current month details to months list
+        months.append(currentMonth)
+
+    # call helper function to generate individual user string lists covering all days exposed in Availability page
+    # TODO - build helper function
+    startDate = currentDate
+    endDate = firstDayofNextMonth - timedelta(days=1)
+    usersDayStrings = calculate_userDateStrings(startDate, endDate, userOOFDays)
 
     # return availability template
-    return render_template("availability.html", currentDate = currentDate, userNames = userNames)
+    return render_template("availability.html", userNames = userNames, months = months, dayStrings = dayStrings, usersDayStrings = usersDayStrings)
 
 
 @app.route("/bookOOF", methods=["GET","POST"])
