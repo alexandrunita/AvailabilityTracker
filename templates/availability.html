@@ -5,7 +5,11 @@
 {% endblock %}
 
 {% block main %}
-    <p class="availabilityLegend">Vacation : V | Bank Holiday : BH | Attending Training : AT | Delivering Training : DT</p>
+    <p class="availabilityLegend">
+        FullDays -> Vacation : V | Bank Holiday : BH | Attending Training : AT | Delivering Training : DT | WeekEnd : WE
+        <br>
+        HalfDays -> Vacation : hV | Attending Training : hAT | Delivering Training : hDT
+    </p>
     <table class="table table-hover">
         <thead>
             <tr>
@@ -25,8 +29,8 @@
             {% for userName in userNames %}
             <tr>
                 <th class="fixed">{{userName}}</th>
-                {% for day in dayStrings %}
-                    <td>0</td>
+                {% for userDayString in usersDayStrings[userName] %}
+                    <td>{{userDayString}}</td>
                 {%endfor%}
             </tr>
             {% endfor %}
