@@ -169,6 +169,21 @@ def bookOOF():
     oofDays = database.lookup_bookedOOF(session["user_id"], date.today().isoformat())
     # if user has no pre-existent booked OOF days, add nothing to standard template
     return render_template("bookOOF.html", oofTypes = OOF_TYPES, oofDays = oofDays)
+
+
+app.route("/removeOOF", methods=["GET","POST"])
+@login_required
+def removeOOF():
+    """ Removes previously booked OOF interval """
+
+    # if GET is used => return table with current booked OOF/no OOF message
+    # query database for upcoming user oofDays
+    oofDays = database.lookup_bookedOOF(session["user_id"], date.today().isoformat())
+    # return template
+    return render_template("removeOOF.html", oofDays = oofDays)
+    if request.method == "POST":
+        return apology("TODO", 404)
+
     
 
 

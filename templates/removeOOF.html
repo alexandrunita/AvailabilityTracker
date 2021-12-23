@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Remove OOF
+{% endblock %}
+
+{% block main %}
+        {% if oofDays %}
+        <table class="mx-auto table table-sm">
+            <thead>
+                <tr>
+                    <th colspan="4">Upcoming OOF days</th>
+                </tr>
+                <tr>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Vacation Type</th>
+                    <th>isHalfDay</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for oofDay in oofDays %}
+                <tr>
+                    <td>{{oofDay[2]}}</td>
+                    <td>{{oofDay[3]}}</td>
+                    <td>
+                        {{oofTypes[oofDay[1] - 1]}}
+                    </td>
+                    <td>
+                        {% if oofDay[4]%}
+                        Half Day
+                        {% else %}
+                        Full Day
+                        {% endif %}
+                    </td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+        {% else %}
+        <p>You have no upcomming OOF days booked.</p>
+        {% endif %}
+{% endblock %}
