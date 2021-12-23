@@ -20,7 +20,7 @@ main {
     z-index: 0;
 }
 
-.availabilityLegend {
+.pageTopLegend {
     position: sticky;
     top: 0;
     left: 0;

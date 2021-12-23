@@ -6,16 +6,20 @@
 
 {% block main %}
         {% if oofDays %}
+        <p class="pageTopLegend">
+            Removing an ongoing OOF interval will only result in shortening up until not including today.
+        </p>
         <table class="mx-auto table table-sm">
             <thead>
                 <tr>
-                    <th colspan="4">Upcoming OOF days</th>
+                    <th colspan="5">Upcoming OOF days</th>
                 </tr>
                 <tr>
                     <th>Start Date</th>
                     <th>End Date</th>
                     <th>Vacation Type</th>
                     <th>isHalfDay</th>
+                    <th>Remove</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,6 +36,12 @@
                         {% else %}
                         Full Day
                         {% endif %}
+                    </td>
+                    <td>
+                        <form action="/removeOOF" method="post">
+                            <input type="text" name="removedOOF" readonly style="display: none;" value="{{oofDay[2]}}|{{oofDay[3]}}">
+                            <input type="submit" value="RemoveOOF">
+                        </form>
                     </td>
                 </tr>
                 {%endfor%}
