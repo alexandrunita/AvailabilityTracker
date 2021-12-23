@@ -5,7 +5,8 @@
 - Source code available on Github : [Availability Tracker](https://github.com/alexandrunita/AvailabilityTracker)
 ### Project Components
 - Static Files
- - style.css : CSS file with custom overrides to bootstrap built-in functionality
+  - style.css : CSS file with custom overrides to bootstrap built-in functionality
+
 - Templates Files
   - apology.html : error page
   - availability.html : main index page, provides overview for the entire team availability
@@ -14,17 +15,109 @@
   - login.html : login page
   - register.html : registration page
   - removeOOF.html : allows cancelling upcoming vacations and truncating ongoing vacations.
+
 - venv Files
   - special folder created by applying steps from : [Using Python environments in VSCode](https://code.visualstudio.com/docs/python/environments)
   - this contains all dependencies needed to run the WebApp
   - contains activation/deactivation scripts to enter/step out of virtual environment
   - ensures we can just download the project on a new windows machine and run directly without having to install all dependencies
+
 - app.py
   - main file for WebApp
-  - contains all routes for WebApp and main logic
-  - calls helper functions in helper files to accomplish side tasks
+  - contains all routes for WebApp and main 
+    - / : availability page/index
+      - queries availability.db for a list of users
+      - for each user collects all user OOF days in dictionary key : userName, values:
+        - date : each individual day off
+        - oofType : what type of vacation this is : Vacation/Bank Holiday/Attending Training/Delivering Training
+        - isHalfDay : 1/0 showing if half or full day of absence
+      - builds list of strings signifying:
+        - month tuples of name + col span for how many days it should span, this list includes 12 months including current one.
+        - strings of 2 digits signifying dates within each month to be presented to user under each corresponding month colspan.
+      - calls helper function to calculate strings of symbols for each user that will be presented in availability table.
+        - this function, located in helpers.py takes startDate, endDate for availability table, 12 months, as well as user OOF Days dictionary generated previously
+        - it returns a dictionary with key : username and value : string of all symbols for individual days starting with startDate up until endDate
+      - returns availability.html template passing it variable needed to fill in table GUI
+    - /bookOOF route which allows users to submit vacations into db and review upcoming/ongoing vacations
+      - for GET method does:
+        - returns all user OOF days formatted as a table
+        - provides interactive form to submit new vacation request by providing:
+          - startDate
+          - endDate
+          - OOF Type : Vacation/Bank Holiday/Attending Training/Delivering Training
+          - isHalfDay : checkbox signifying half day vacation
+      - for POST request does:
+        - collects : startDate, endDate, halfDay, oofType submittend by end user through forms
+        - validates user inputs
+          - if input is determined to be invalid/conflicting it throws an error page with na explanation
+        - calls database function to submit new OOF request
+        - returns template bookOOF.html with variables needed to populate GUI
+    - /removeOOF route which allows users to remove/cancel vacation requests:
+      - for GET method:
+        - queries database for all ongoing/upcomming vacations of logged in user
+        - returns template with table showing all vacations and button for removal
+      - for POST method:
+        - it collects information on removed vacation : startDate & endDate
+        - validates dates, if not valid returns error page
+        - calls database helper functions that takes startdate, endDate and user_id to remove/cancel vacation
+    - /login : allows registered users to login
+      - for GET method:
+        - returns template with login form
+      - for POST method:
+        - validates if username & password were provided, if not, it throws an error page
+        - looks up user in database
+          - if invalid username or password hash check fails, it throws an error page
+        - if login successful, it stores user_id in current session and redirects to / index/availability page.
+    - /register : allows new users to register to the team
+      - for GET method:
+        - returns registration form
+      - for POST method:
+        - validates username was provided and calls helper database function to confirm it does not have a conflicting existing user.
+        - validates password and confirmation password match, if not returns error page
+        - generates password hash
+        - calls database helper function to store username and password in database users table
+        - returns successfull registration message
+    - /logout : allows users to logout of current session
+      - clears current session and redirects user to login page
+
 - database.py
   - contains helper functions meant to interact with the availability.db SQLite3 database
+    - username lookup function
+      - connects to DB
+      - if username provided, looks up that username and returns a tuple with all properties for the given user
+      - if no username provided, looks up all users and returns a list of tuples wit hall user properties
+    - insert user function
+      - takes username and password has as input
+      - connects to DB and inserts user into users table
+    - lookup Booked OOF function
+      - takes user_id and current date as inputs
+      - connects to DB and retrieves all ongoing and upcomming user vacations
+      - returns a list of tuples with all vacation day properties
+    - insert OOF function
+     - takes startDate, endDate, isHalfDay, oofType and user_id as inputs
+     - connects to DB, interogates OOF type to find the id that matches that OOF day name
+     - converts date objects to numeric strings
+     - connects to DB and checks if any conflicting vacations exist, if they do returns False for upstream function to return an error page to the user.
+     - if no conflicts exist it inserts the vacation day into the DB
+    - remove OOF function
+      - takes user_id, startDate and endDate as inputs
+      - connects to DB, checks if the vacation up for deletion is already ongoing
+        - if it is ongoing, it edits the end date to yesterday so that today the user could be seen as back in office
+        - if it is upcoming, it removes the vacation from DB completely
+      
+- availability.db
+  - relational database including 3 tables
+    - users : which includes
+      - username
+      - passwordhas
+      - id (primary key)
+    - oof_types : which includes
+      - id (primary key)
+      - name
+    - oof_days
+      - user_id (foreign key - reference users(id))
+      - oof_type_id (foreing key - reference oof_types(id))
+
 - helper.py
   - contains a couple Flask app support functions
   - also contains helper function to generate symbols that are printed to the availability table on the index page
