@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import date
+from datetime import date, timedelta
 
 def username_lookup(userName):
     """ Lookup user from availability.db by unique username """
@@ -81,4 +81,25 @@ def insert_OOF(startDate, endDate, isHalfDay, oofType, user_id):
     conn.commit()
     conn.close()
     # return True for calling function to know insert was successful
+    return True
+
+
+def remove_OOF(user_id, startDate, endDate):
+    """ Removes or shortens booked OOFs """
+    # connect to db
+    conn = sqlite3.connect("availability.db")
+    # create cursor
+    c = conn.cursor()
+    # initialize today
+    today = date.today()
+    # check if startDate is before today => we will shorten OOF interval by adjusting endDate to yesterday
+    # if startDate > today => we will remove the OOF interval from oof_days altogether
+    if startDate < today:
+        c.execute("UPDATE oof_days SET end_date = ? WHERE start_date = ? AND end_date = ? AND user_id = ?", ((today - timedelta(days=1)).isoformat(), startDate.isoformat(), endDate.isoformat(), user_id))
+    else:
+        c.execute("DELETE FROM oof_days WHERE start_date = ? AND end_date = ? and user_id = ?", (startDate.isoformat(), endDate.isoformat(), user_id))
+    # commit and close
+    conn.commit()
+    conn.close()
+    # return True to signal removal/shortening successful
     return True

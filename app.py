@@ -169,6 +169,31 @@ def bookOOF():
     oofDays = database.lookup_bookedOOF(session["user_id"], date.today().isoformat())
     # if user has no pre-existent booked OOF days, add nothing to standard template
     return render_template("bookOOF.html", oofTypes = OOF_TYPES, oofDays = oofDays)
+
+
+@app.route("/removeOOF", methods=["GET","POST"])
+@login_required
+def removeOOF():
+    """ Removes previously booked OOF interval """
+    
+    if request.method == "POST":
+        removedOOF = request.form.get("removedOOF")
+        removedOOFDates = removedOOF.partition("|")
+        # try to parse dates, if this fails user input is incorrect and we must terminate OOF removal operation
+        try:
+            startDate = date.fromisoformat(removedOOFDates[0])
+            endDate = date.fromisoformat(removedOOFDates[2])
+        except:
+            return apology("Invalid stardDate-endDate data, OOF removal operation aborted", 400)
+        # TODO - call database function that removes selected OOFDate
+        database.remove_OOF(session["user_id"], startDate, endDate)
+    # if GET is used => return table with current booked OOF/no OOF message
+    # query database for upcoming user oofDays
+    oofDays = database.lookup_bookedOOF(session["user_id"], date.today().isoformat())
+    # return template
+    return render_template("removeOOF.html", oofDays = oofDays, oofTypes = OOF_TYPES)
+
+
     
 
 
