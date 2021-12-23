@@ -28,12 +28,14 @@
         <script>
             // function that hides/displays halfDay checkbox and label
             function hideCheckbox() {
+                console.log("triggered");
                 let start = document.querySelector('#startDate').value;
                 let end = document.querySelector('#endDate').value;
+                let oofTypeValue = document.querySelector('#oofType').value;
                 let halfDayCheckbox = document.querySelector('#halfDay');
                 let halfDayLabel = document.querySelector('#halfDayLabel');
                 // if user has selected startDate & endDate and they are the same, hide halfDay checkbox & label
-                if(start != end && start != '' && end != '') {
+                if((start != end && start != '' && end != '') || oofTypeValue == 'Bank Holiday') {
                     halfDayCheckbox.style.display = 'none';
                     halfDayLabel.style.display = 'none';
                 }
@@ -46,9 +48,11 @@
             // when startDate or endDate changed => run function to check if halfDay checkbox needs to be hidden
             startButton = document.querySelector('#startDate');
             endButton = document.querySelector('#endDate');
+            oofType = document.querySelector('#oofType');
 
             startButton.addEventListener("change", hideCheckbox);
             endButton.addEventListener("change", hideCheckbox);
+            oofType.addEventListener("change", hideCheckbox);
         </script>
         {% if oofDays %}
         <table class="mx-auto table table-sm">
