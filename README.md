@@ -2,6 +2,7 @@
 ## Video Demo : [Availability Tracker Demo](https://youtu.be/ibdxmHY2Z0Y)
 ## Description
 - **Availability** Tracker WebApp offers a team visibility on the availability of their colleagues and allows for distribution of tasks according to employee availability.
+- The WebApp is built upon [Flask Framework](https://flask.palletsprojects.com/en/2.0.x/tutorial/index.html)
 - Source code available on Github : [Availability Tracker](https://github.com/alexandrunita/AvailabilityTracker)
 ### Project Components
 - Static Files
